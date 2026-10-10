@@ -1,0 +1,33 @@
+[project]
+name = "fastapi-todoapp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "faridntf", email = "faridnajafi.0037@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.20.0",
+    "fastapi-swagger>=0.4.61",
+    "fastapi[all]>=0.143.0",
+    "httpx>=0.28.1",
+    "pillow>=12.3.0",
+    "psycopg[binary]>=3.3.6",
+    "pwdlib[argon2]>=0.3.1",
+    "pyjwt>=2.15.1",
+    "python-multipart>=0.0.32",
+    "sqlalchemy>=2.1.4",
+]
+
+[project.scripts]
+fastapi-todoapp = "fastapi_todoapp:main"
+
+[build-system]
+requires = ["uv_build>=0.12.24,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "faker>=40.41.0",
+]

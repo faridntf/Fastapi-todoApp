@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+:root{color-scheme:dark;--ink:#f3f6ff;--muted:#b2bdd2;--primary:#7778ff}
+*{box-sizing:border-box}
+html{min-height:100%;scroll-behavior:smooth}
+body{margin:0;min-height:100vh;font-family:Vazirmatn,Tahoma,sans-serif;color:var(--ink);background:#080f20}
+.error-stage{isolation:isolate;position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:38px 24px 34px}
+.error-stage::before{content:"";position:absolute;inset:-10%;z-index:-4;background:radial-gradient(ellipse 44% 47% at 15% 25%,#274b82 0%,transparent 78%),radial-gradient(ellipse 45% 49% at 84% 15%,#49366f 0%,transparent 77%),radial-gradient(ellipse 55% 55% at 56% 88%,#075f68 0%,transparent 74%),#0a1022;animation:ambient 14s ease-in-out infinite alternate}
+.ambient{position:absolute;inset:-15%;z-index:-3;pointer-events:none;filter:blur(44px)}
+.orb{position:absolute;border-radius:50%;mix-blend-mode:screen;opacity:.42;animation:float 13s ease-in-out infinite alternate}
+.orb-blue{width:43vw;height:43vw;min-width:340px;min-height:340px;top:4%;left:3%;background:radial-gradient(circle,#287cce,transparent 70%)}
+.orb-purple{width:38vw;height:38vw;min-width:300px;min-height:300px;right:1%;top:12%;background:radial-gradient(circle,#a365c3,transparent 70%);animation-delay:-6s}
+.orb-teal{width:43vw;height:32vw;min-width:350px;min-height:300px;bottom:-5%;left:28%;background:radial-gradient(circle,#16b6aa,transparent 60%);animation-delay:-9s}
+.background-grid{position:absolute;inset:0;z-index:-2;pointer-events:none;background-image:linear-gradient(#b9c9ff0b 1px,transparent 1px),linear-gradient(90deg,#b9c9ff0b 1px,transparent 1px);background-size:52px 52px;mask-image:linear-gradient(to bottom,transparent,#000 24%,#000 77%,transparent)}
+.site-header{width:min(100%,1000px);display:flex;align-items:center;justify-content:flex-start;margin-bottom:34px}
+.brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:#fff;font-size:23px;font-weight:800}
+.brand img{width:54px;height:54px;object-fit:contain;border-radius:16px;filter:drop-shadow(0 5px 12px #6161e744)}
+.error-card{width:min(100%,1000px);min-height:425px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:25px;padding:42px 55px;border:1px solid #b3c7ff25;border-radius:30px;background:linear-gradient(130deg,#192640d9,#101a31eb 70%);box-shadow:0 24px 80px #03091880,inset 0 1px #ffffff10;backdrop-filter:blur(20px)}
+.illustration{grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:center;min-width:0}
+.illustration svg{width:100%;max-width:440px;height:auto;overflow:visible;animation:bob 6s ease-in-out infinite}
+.error-content{grid-column:2;grid-row:1;text-align:right;min-width:0}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:#aaa6ff;font-size:14px;font-weight:700}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#9a8bff;box-shadow:0 0 14px #9a8bff}
+h1{font-size:clamp(31px,3.3vw,45px);letter-spacing:-.7px;margin:14px 0 20px;line-height:1.5}
+p{color:var(--muted);font-size:16px;line-height:2.15;max-width:370px;margin:0 0 27px}
+.home-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 22px;border-radius:15px;color:white;text-decoration:none;font-weight:700;font-size:14px;background:linear-gradient(115deg,#6866ef,#5154d9);box-shadow:0 10px 30px #5a5fe344;border:1px solid #c3c4ff38;transition:transform .2s,box-shadow .2s,filter .2s}
+.home-button svg{width:21px;height:21px}
+.home-button:hover{transform:translateY(-3px);box-shadow:0 15px 34px #5a5fe36b;filter:brightness(1.1)}
+.home-button:focus-visible,.brand:focus-visible{outline:3px solid #a4b4ff;outline-offset:5px}
+footer{display:flex;align-items:center;gap:9px;margin-top:37px;color:#b2bdd2;font-size:13px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#4fd6a4;box-shadow:0 0 0 5px #4fd6a418}
+@keyframes float{to{transform:translate(30px,-35px) scale(1.07)}}
+@keyframes ambient{to{transform:scale(1.06) translateY(-1%)}}
+@keyframes bob{50%{transform:translateY(-9px)}}
+@media(max-width:720px){.error-stage{padding:25px 16px;justify-content:center}.site-header{margin-bottom:24px}.brand{font-size:20px}.brand img{width:44px;height:44px}.error-card{grid-template-columns:1fr;gap:0;padding:25px 25px 35px;border-radius:24px;text-align:center}.illustration{grid-column:1;grid-row:1}.illustration svg{max-width:300px}.error-content{grid-column:1;grid-row:2;text-align:center}.eyebrow{font-size:13px}h1{margin:8px 0 12px}p{font-size:14px;margin:0 auto 24px;max-width:410px}footer{margin-top:25px;text-align:center}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}

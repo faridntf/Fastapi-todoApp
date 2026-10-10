@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a1125">
+    <title>ورود به حساب | تیک راه</title>
+    <link rel="icon" href="../assets/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../assets/css/login.css">
+    <script src="../assets/js/login.js" defer></script>
+</head>
+<body>
+    <div class="ambient" aria-hidden="true">
+        <div class="aurora" id="aurora">
+            <div class="orb a"></div>
+            <div class="orb b"></div>
+            <div class="orb c"></div>
+        </div>
+    </div>
+    <div class="page">
+        <header class="page-header">
+            <a class="brand" href="/" aria-label="تیک راه، صفحه اصلی">
+                <img src="../assets/img/main_logo.png" alt="" width="60" height="60">
+                <span>تیک راه</span>
+            </a>
+            <a class="back-link" href="/">بازگشت به خانه <span aria-hidden="true">←</span></a>
+        </header>
+
+        <main class="auth-card">
+            <aside class="visual-panel" aria-label="تیک راه، قدم‌های کوچک، پیشرفت‌های بزرگ">
+                <div class="orbit-scene" aria-hidden="true">
+                    <div class="orbit orbit-outer"></div>
+                    <div class="orbit orbit-inner"></div>
+                    <div class="orbit orbit-tilted"></div>
+                    <div class="orbit orbit-cross"></div>
+                    <span class="star star-one">✦</span>
+                    <span class="star star-two">✧</span>
+                    <span class="orbit-dot"></span>
+                    <div class="logo-tile"><img src="../assets/img/main_logo.png" alt="" width="180" height="180"></div>
+                </div>
+                <div class="visual-caption">
+                    <span class="caption-line" aria-hidden="true"></span>
+                    <h2>قدم‌های کوچک، پیشرفت‌های بزرگ</h2>
+                    <p>به کارهات نظم بده، به ایده‌هات فرصت.</p>
+                </div>
+            </aside>
+
+            <section class="form-panel" aria-labelledby="form-title">
+                <div class="form-heading">
+                    <p class="eyebrow" id="welcome">خوش برگشتی!</p>
+                    <h1 id="form-title" tabindex="-1">ورود به حساب</h1>
+                </div>
+
+                <form id="login-form">
+                    <div class="field">
+                        <label for="login-username">نام کاربری</label>
+                        <input id="login-username" name="username" autocomplete="username" placeholder="نام کاربری‌ات را وارد کن" required>
+                    </div>
+                    <div class="field">
+                        <label for="login-password">رمز عبور</label>
+                        <div class="password-field">
+                            <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="رمز عبورت را وارد کن" required>
+                            <button class="password-toggle" type="button" aria-label="نمایش رمز عبور" aria-controls="login-password" aria-pressed="false">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="submit-button" type="submit">ورود <span aria-hidden="true">←</span></button>
+                    <p class="switch-copy">حساب کاربری نداری؟ <a href="#register" class="switch-link">ثبت‌نام کن</a></p>
+                </form>
+
+                <form id="register-form" hidden>
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="register-username">نام کاربری</label>
+                            <input id="register-username" name="username" autocomplete="username" placeholder="مثلاً alex" minlength="3" maxlength="50" pattern="[a-zA-Z0-9_]+" title="۳ تا ۵۰ حرف انگلیسی، عدد یا زیرخط" required>
+                        </div>
+                        <div class="field">
+                            <label for="register-email">ایمیل</label>
+                            <input id="register-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" dir="ltr" required>
+                        </div>
+                        <div class="field">
+                            <label for="register-password">رمز عبور</label>
+                            <div class="password-field">
+                                <input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="یک رمز عبور بساز" minlength="8" maxlength="128" aria-describedby="password-hint" required>
+                                <button class="password-toggle" type="button" aria-label="نمایش رمز عبور" aria-controls="register-password" aria-pressed="false">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="register-confirm">تکرار رمز عبور</label>
+                            <input id="register-confirm" name="re_password" type="password" autocomplete="new-password" placeholder="رمز عبور را دوباره وارد کن" minlength="8" maxlength="128" required>
+                        </div>
+                    </div>
+                    <p class="field-hint" id="password-hint">رمز عبور حداقل ۸ کاراکتر داشته باشد.</p>
+                    <div class="field">
+                        <label for="register-phone">شماره تلفن <span class="optional">(اختیاری)</span></label>
+                        <input id="register-phone" name="phone_number" type="tel" inputmode="tel" autocomplete="tel" placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷" dir="ltr" pattern="09[0-9]{9}" title="شماره موبایل ۱۱ رقمی با ۰۹ شروع شود">
+                    </div>
+                    <button class="submit-button" type="submit">ساخت حساب <span aria-hidden="true">←</span></button>
+                    <p class="switch-copy">قبلاً ثبت‌نام کردی؟ <a href="#login" class="switch-link">ورود به حساب</a></p>
+                </form>
+                <p id="form-status" class="form-status" role="status" aria-live="polite" hidden></p>
+                <noscript><p class="field-hint">برای جابه‌جایی بین فرم‌ها، جاوااسکریپت مرورگر را فعال کن.</p></noscript>
+            </section>
+        </main>
+        <footer>تیک راه • مسیر روشن‌تر برای انجام کارها</footer>
+    </div>
+</body>
+</html>

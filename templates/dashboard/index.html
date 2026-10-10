@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080f20">
+  <meta name="description" content="فضای کاربری تیک راه">
+  <title>تیک راه | فضای کاری</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+  <link rel="stylesheet" href="../assets/css/workspace.css">
+  
+</head>
+<body>
+  <div class="glass-ambient" aria-hidden="true"><div class="glass-aurora" id="workspaceAurora"><span class="glass-orb orb-one"></span><span class="glass-orb orb-two"></span><span class="glass-orb orb-three"></span></div></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="تیک راه، صفحه ورود">
+      <span class="brand-mark"><img src="../assets/img/main_logo.png" alt=""></span>
+      <span>تیک راه</span>
+    </a>
+
+    <label class="search-box">
+      <svg class="icon search-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.8" cy="10.8" r="6.8"></circle>
+        <path d="m16 16 4.2 4.2"></path>
+      </svg>
+      <input id="searchInput" type="search" placeholder="جست‌وجو در تسک‌ها" aria-label="جست‌وجو در تسک‌ها">
+    </label>
+
+    <div class="top-actions">
+      <div class="profile-menu-wrap">
+        <button class="profile" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profileMenu">
+          <span class="avatar" id="userAvatar">؟</span>
+          <span class="profile-name" id="profileName">کاربر</span>
+          <svg class="icon chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m7 10 5 5 5-5"></path>
+          </svg>
+        </button>
+        <div class="profile-menu" id="profileMenu" hidden>
+          <button id="openProfileForm" type="button">تکمیل یا ویرایش پروفایل</button>
+          <button id="logoutButton" type="button">خروج از حساب</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="فیلتر تسک‌ها">
+      <nav class="primary-nav">
+        <button class="nav-link active" type="button" data-filter="all">کارهای من</button>
+        <button class="nav-link" type="button" data-filter="pending">انجام‌نشده</button>
+        <button class="nav-link" type="button" data-filter="completed">انجام‌شده</button>
+      </nav>
+      <div class="sidebar-note">
+        <span class="note-dot"></span>
+        <span>قدم‌های کوچک، پیشرفت‌های بزرگ</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section class="welcome-row">
+        <div>
+          <p class="eyebrow" id="welcomeDate">برنامه امروز</p>
+          <h1 id="welcomeTitle">سلام</h1>
+        </div>
+        <button class="add-task-button" id="openTaskForm" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          <span>افزودن تسک</span>
+        </button>
+      </section>
+
+      <section class="stats-grid" aria-label="آمار تسک‌ها">
+        <article class="stat-card">
+          <span class="stat-icon stat-purple" aria-hidden="true">☷</span>
+          <div><strong id="totalCount">۰</strong><span>مجموع کارها</span></div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon stat-green" aria-hidden="true">✓</span>
+          <div><strong id="doneCount">۰</strong><span>انجام‌شده</span></div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon stat-red" aria-hidden="true">…</span>
+          <div><strong id="remainingCount">۰</strong><span>باقی‌مانده</span></div>
+        </article>
+      </section>
+
+      <section class="task-card">
+        <div class="section-heading">
+          <h2 id="taskHeading">کارهای من</h2>
+        </div>
+        <div class="task-list" id="taskList" aria-live="polite"></div>
+        <div class="empty-state" id="emptyState" hidden>کاری برای نمایش وجود ندارد.</div>
+        <p class="loading-state" id="loadingState">در حال دریافت اطلاعات…</p>
+      </section>
+    </main>
+
+    <aside class="left-column" aria-label="تقویم و کارهای انجام‌نشده">
+      <section class="calendar-card" aria-label="تقویم">
+        <div class="calendar-heading">
+          <div>
+            <span class="calendar-label">امروز</span>
+            <h2 id="calendarMonth">—</h2>
+          </div>
+          <div class="calendar-controls">
+            <button type="button" id="previousMonth" aria-label="ماه قبل">‹</button>
+            <button type="button" id="nextMonth" aria-label="ماه بعد">›</button>
+          </div>
+        </div>
+        <div class="calendar-weekdays" id="calendarWeekdays" aria-hidden="true"></div>
+        <div class="calendar-days" id="calendarDays" role="grid" aria-label="روزهای ماه"></div>
+      </section>
+
+      <section class="upcoming-card" aria-label="کارهای انجام‌نشده">
+        <div class="upcoming-heading">
+          <h2>کارهای انجام‌نشده</h2>
+          <span id="pendingCount">۰</span>
+        </div>
+        <div class="upcoming-list" id="pendingTasks" aria-live="polite"></div>
+        <p class="pending-empty" id="pendingEmpty" hidden>همهٔ تسک‌ها انجام شده‌اند.</p>
+      </section>
+    </aside>
+  </div>
+
+  <dialog class="task-dialog" id="taskDialog">
+    <form id="taskForm">
+      <div class="dialog-heading">
+        <div><span class="eyebrow">برنامه‌ریزی روزانه</span><h2 id="taskDialogTitle">افزودن تسک</h2></div>
+        <button class="icon-button" id="closeTaskForm" type="button" aria-label="بستن">×</button>
+      </div>
+      <input id="taskId" name="id" type="hidden">
+      <label class="form-label" for="taskTitle">عنوان تسک</label>
+      <input class="form-input" id="taskTitle" name="title" required maxlength="50" placeholder="عنوان تسک را بنویس">
+      <label class="form-label" for="taskDescription">توضیحات <span>(اختیاری)</span></label>
+      <textarea class="form-input" id="taskDescription" name="description" maxlength="100" placeholder="توضیح کوتاه"></textarea>
+      <label class="form-label" for="taskPriority">اولویت</label>
+      <select class="form-input" id="taskPriority" name="grading">
+        <option value="low">کم</option>
+        <option value="medium" selected>متوسط</option>
+        <option value="high">زیاد</option>
+      </select>
+      <button class="add-task-button submit-task" type="submit">ذخیره</button>
+    </form>
+  </dialog>
+
+  <dialog class="task-dialog profile-dialog" id="profileDialog">
+    <form id="profileForm">
+      <div class="dialog-heading">
+        <div><span class="eyebrow">اطلاعات حساب</span><h2>پروفایل کاربری</h2></div>
+        <button class="icon-button" id="closeProfileForm" type="button" aria-label="بستن">×</button>
+      </div>
+
+      <label class="form-label" for="profileBio">بیوگرافی</label>
+      <textarea class="form-input" id="profileBio" name="bio" maxlength="1000"></textarea>
+
+      <label class="form-label" for="profileAvatar">تصویر پروفایل</label>
+      <input class="form-input" id="profileAvatar" name="avatar" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+      <small class="field-hint">فقط JPG یا PNG و حداکثر ۱ مگابایت.</small>
+      <img id="profileAvatarPreview" class="profile-avatar-preview" alt="پیش‌نمایش تصویر پروفایل">
+
+      <label class="form-label" for="profileNationalId">کد ملی</label>
+      <input class="form-input" id="profileNationalId" name="national_id" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required>
+
+      <label class="form-label" for="profileFirstName">نام</label>
+      <input class="form-input" id="profileFirstName" name="first_name" minlength="2" maxlength="50" required>
+
+      <label class="form-label" for="profileLastName">نام خانوادگی</label>
+      <input class="form-input" id="profileLastName" name="last_name" minlength="2" maxlength="50" required>
+
+      <label class="form-label" for="profileBirthDate">تاریخ تولد</label>
+      <input class="form-input" id="profileBirthDate" name="date_of_birth" type="date">
+
+      <label class="form-label" for="profileGender">جنسیت</label>
+      <select class="form-input" id="profileGender" name="gender">
+        <option value="">انتخاب نشده</option>
+        <option value="male">مرد</option>
+        <option value="female">زن</option>
+        <option value="other">دیگری</option>
+        <option value="prefer_not_to_say">ترجیح می‌دهم نگویم</option>
+      </select>
+
+      <label class="form-label" for="profilePostalCode">کد پستی</label>
+      <input class="form-input" id="profilePostalCode" name="postal_code" maxlength="10">
+
+      <label class="form-label" for="profileAddress">آدرس</label>
+      <textarea class="form-input" id="profileAddress" name="address" maxlength="1000"></textarea>
+
+      <div class="profile-form-actions">
+        <button class="add-task-button submit-task" type="submit">ذخیره پروفایل</button>
+        <button class="delete-profile-button" id="deleteProfileButton" type="button" hidden>حذف پروفایل کاربری</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="delete-dialog" id="deleteDialog" aria-labelledby="deleteDialogTitle">
+    <h2 id="deleteDialogTitle">حذف تسک</h2>
+    <p id="deleteDialogMessage">از حذف این تسک مطمئنی؟</p>
+    <div class="delete-dialog-actions">
+      <button class="cancel-delete" id="cancelDelete" type="button">لغو</button>
+      <button class="confirm-delete" id="confirmDelete" type="button">حذف شود</button>
+    </div>
+  </dialog>
+
+  <div class="workspace-toasts" id="toastContainer" aria-live="polite" aria-relevant="additions"></div>
+  <script src="../assets/js/workspace.js" defer></script>
+</body>
+</html>
+
