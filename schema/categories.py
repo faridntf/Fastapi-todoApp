@@ -10,7 +10,6 @@ class CategoryBase(BaseModel):
     name : str = Field(
         title="Category name",
         max_length=50,
-        pattern="[a-zA-Z]+"
     )
     
     parent_id : Optional[int] = Field(
@@ -24,7 +23,6 @@ class CategoryBase(BaseModel):
         default=None,
         title="category description",
         max_length=150,
-        pattern="[a-zA-Z]+"
     )
     
     model_config = ConfigDict(
@@ -48,7 +46,6 @@ class CategoryUpdateSc(BaseModel):
     
     name : Optional[str] = Field(
         default=None,
-        pattern="[a-zA-Z]+"
     )
     
     parent_id : Optional[int] = Field(
@@ -57,7 +54,6 @@ class CategoryUpdateSc(BaseModel):
     
     description : Optional[str] = Field(
         default=None,
-        pattern="[a-zA-Z]+"
     )
     
     model_config = ConfigDict(
