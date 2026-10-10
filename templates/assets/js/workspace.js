@@ -1,19 +1,6 @@
-"use strict";
+import { errorMessages } from "./ui-errors.js";
+import * as workspaceApi from "./workspace.api.js";
 
-const API = {
-  user: "/users/user_detail",
-  profile: "/profile/profile-detail",
-  tasks: "/tasks/list-tasks",
-  createTask: "/tasks/create",
-  completeTask: (id) => "/tasks/update-task-complete/" + id,
-  updateTask: (id) => "/tasks/update-task/" + id,
-  deleteTask: (id) => "/tasks/task/" + id,
-  deleteProfile: "/profile/profile-information",
-  uploadAvatar: "/profile/upload-avatarf2",
-};
-
-const PAGE_SIZE = 100;
-const REFRESH_INTERVAL = 15000;
 const numberFormat = new Intl.NumberFormat("fa-IR");
 
 const elements = {
@@ -44,64 +31,6 @@ let queuedRefresh = false;
 let pendingDeleteId = null;
 let avatarPreviewUrl = null;
 let displayedCalendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-
-class ApiError extends Error {
-  constructor(messages, status) {
-    super(messages[0] || "درخواست ناموفق بود.");
-    this.messages = messages;
-    this.status = status;
-  }
-}
-
-function translateApiMessage(detail, status) {
-  const message = typeof detail === "string" ? detail : "";
-  const normalized = message.toLowerCase();
-
-  if (status === 401 || normalized.includes("please login")) {
-    return "نشست ورود شما معتبر نیست؛ دوباره وارد حساب شو.";
-  }
-  if (status === 403 || normalized.includes("guest users")) {
-    return "این عملیات برای سطح دسترسی حساب شما فعال نیست.";
-  }
-  if (normalized.includes("nationalid already in use") || normalized.includes("national id already in use")) {
-    return "این کد ملی قبلاً برای حساب دیگری ثبت شده است.";
-  }
-  if (normalized.includes("profile not found")) {
-    return "پروفایلی برای این حساب ثبت نشده است.";
-  }
-  if (normalized.includes("already exist")) {
-    return "تسکی با این عنوان از قبل وجود دارد.";
-  }
-  if (normalized.includes("category id is invalid")) {
-    return "دسته‌بندی پیش‌فرض تسک (شناسهٔ ۱) در پایگاه داده پیدا نشد.";
-  }
-  if (normalized.includes("task not found")) {
-    return "تسک پیدا نشد؛ فهرست را تازه کن.";
-  }
-  if (status >= 500) {
-    return "خطایی در سرور رخ داد. لطفاً دوباره تلاش کن.";
-  }
-  return message || "درخواست انجام نشد. لطفاً دوباره تلاش کن.";
-}
-
-async function request(url, options = {}) {
-  const response = await fetch(url, {
-    credentials: "same-origin",
-    ...options,
-  });
-
-  if (response.status === 204) return null;
-
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    const detail = data && data.detail;
-    const messages = Array.isArray(detail)
-      ? detail.map((item) => item.msg || "اطلاعات واردشده معتبر نیست.")
-      : [translateApiMessage(detail, response.status)];
-    throw new ApiError(messages, response.status);
-  }
-  return data;
-}
 
 function showToasts(messages, type) {
   const kind = type || "error";
@@ -137,7 +66,7 @@ function showToasts(messages, type) {
 }
 
 function showError(error) {
-  const messages = error.messages || [error.message || "خطای پیش‌بینی‌نشده رخ داد."];
+  const messages = errorMessages(error);
   showToasts(messages, "error");
 }
 
@@ -148,29 +77,18 @@ function setUserIdentity(user, profile) {
     .trim();
   const displayName = fullName || user.username || "کاربر";
 
-  document.querySelector("#welcomeTitle").textContent = "صبح بخیر، " + displayName;
+  document.querySelector("#welcomeTitle").textContent = "سلام " + displayName;
   document.querySelector("#profileName").textContent = displayName;
   document.querySelector("#userAvatar").textContent = displayName.charAt(0) || "؟";
 }
 
 async function loadProfile() {
-  try {
-    const profile = await request(API.profile);
-    profileExists = true;
-    profileLoaded = true;
-    profileData = profile;
-    fillProfileForm(profile);
-    return profile;
-  } catch (error) {
-    if (error.status === 404) {
-      profileExists = false;
-      profileLoaded = true;
-      profileData = null;
-      fillProfileForm(null);
-      return null;
-    }
-    throw error;
-  }
+  const profile = await workspaceApi.getProfile();
+  profileExists = Boolean(profile);
+  profileLoaded = true;
+  profileData = profile;
+  fillProfileForm(profile);
+  return profile;
 }
 
 function fillProfileForm(profile) {
@@ -181,33 +99,11 @@ function fillProfileForm(profile) {
   form.elements.date_of_birth.value =
     profile && profile.date_of_birth ? profile.date_of_birth.slice(0, 10) : "";
 
-  // endpoint ویرایش فعلی کد ملی تکراری را درست استثنا نمی‌کند.
-  // در پروفایل موجود، کد ملی از فرم قابل تغییر نیست.
   form.elements.national_id.readOnly = Boolean(profile);
   document.querySelector("#deleteProfileButton").hidden = !profile;
 
   showAvatarPreview(null);
   document.querySelector("#profileAvatar").value = "";
-}
-
-async function loadAllTasks() {
-  const results = [];
-  let offset = 0;
-
-  while (true) {
-    const page = await request(
-      API.tasks + "?limit=" + PAGE_SIZE + "&offset=" + offset
-    );
-    if (!Array.isArray(page)) {
-      throw new Error("پاسخ فهرست تسک‌ها قالب مورد انتظار را ندارد.");
-    }
-
-    results.push(...page);
-    if (page.length < PAGE_SIZE) break;
-    offset += PAGE_SIZE;
-  }
-
-  return results;
 }
 
 async function loadWorkspace(options = {}) {
@@ -220,8 +116,8 @@ async function loadWorkspace(options = {}) {
 
   try {
     const data = await Promise.all([
-      request(API.user),
-      loadAllTasks(),
+      workspaceApi.getUser(),
+      workspaceApi.getAllTasks(),
     ]);
 
     tasks = data[1];
@@ -439,8 +335,19 @@ document.querySelectorAll("[data-filter]").forEach((button) => {
 
 elements.search.addEventListener("input", renderTasks);
 
-function openTaskDialog(task) {
+let taskDialogVersion = 0;
+
+async function openTaskDialog(task) {
+  const version = ++taskDialogVersion;
   elements.taskForm.reset();
+  const categorySelect = elements.taskForm.elements.category_id_fk;
+  const categoryStatus = document.querySelector("#taskCategoryStatus");
+  const submit = elements.taskForm.querySelector('button[type="submit"]');
+  categorySelect.replaceChildren(new Option("دسته‌بندی را انتخاب کن", ""));
+  categorySelect.disabled = true;
+  submit.disabled = true;
+  categoryStatus.textContent = "در حال دریافت دسته‌بندی‌ها…";
+  elements.taskForm.elements.grading.disabled = Boolean(task);
   document.querySelector("#taskId").value = task ? String(task.id) : "";
   document.querySelector("#taskDialogTitle").textContent =
     task ? "ویرایش تسک" : "افزودن تسک";
@@ -451,6 +358,23 @@ function openTaskDialog(task) {
   }
   elements.taskDialog.showModal();
   document.querySelector("#taskTitle").focus();
+  try {
+    const categories = await workspaceApi.getCategories();
+    if (version !== taskDialogVersion) return;
+    for (const category of categories) {
+      categorySelect.add(new Option(category.name, String(category.id)));
+    }
+    categorySelect.value = String(task ? task.category_id_fk : "");
+    categorySelect.disabled = categories.length === 0;
+    submit.disabled = categories.length === 0;
+    categoryStatus.textContent = categories.length
+      ? ""
+      : "هنوز دسته‌بندی‌ای ثبت نشده است؛ برای افزودن آن با مدیر تماس بگیر.";
+  } catch (error) {
+    if (version !== taskDialogVersion) return;
+    categoryStatus.textContent = "دریافت دسته‌بندی‌ها ناموفق بود؛ فرم را ببند و دوباره باز کن.";
+    showError(error);
+  }
 }
 
 document.querySelector("#openTaskForm").addEventListener("click", () => openTaskDialog(null));
@@ -458,23 +382,16 @@ document.querySelector("#closeTaskForm").addEventListener("click", () => element
 
 elements.taskForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (elements.taskForm.elements.category_id_fk.disabled || !elements.taskForm.reportValidity()) return;
 
   const values = new FormData(elements.taskForm);
   const id = values.get("id");
-  const payload = {
-    title: String(values.get("title")).trim(),
-    description: String(values.get("description") || "").trim() || null,
-    grading: values.get("grading"),
-  };
+  const valuesObject = Object.fromEntries(values);
 
   try {
-    // category_id_fk را نمی‌فرستیم تا schema مقدار پیش‌فرض ۱ را اعمال کند.
-    // validator فعلی بک‌اند برای category_id_fk ورودی صریح را خراب می‌کند.
-    const savedTask = await request(id ? API.updateTask(id) : API.createTask, {
-      method: id ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const savedTask = await (id
+      ? workspaceApi.updateTask(id, valuesObject)
+      : workspaceApi.createTask(valuesObject));
 
     elements.taskDialog.close();
     if (savedTask) {
@@ -509,31 +426,14 @@ elements.taskList.addEventListener("click", async (event) => {
     pendingDeleteId = task.id;
     document.querySelector("#deleteDialogMessage").textContent =
       "تسک «" + task.title + "» حذف شود؟";
-    document.querySelector("#deleteDialog").showModal();
+    elements.deleteDialog.showModal();
     return;
   }
 
   if (button.dataset.action === "complete" && !task.is_completed) {
     try {
-      await request(API.completeTask(task.id), {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_completed: true }),
-      });
+      await workspaceApi.completeTask(task.id);
     } catch (error) {
-      // مسیر فعلی ممکن است پس از commit در ساخت پاسخ خطا دهد؛
-      // فهرست را دوباره می‌گیریم تا وضعیت ذخیره‌شده را بررسی کنیم.
-      try {
-        tasks = await loadAllTasks();
-        renderTaskLists();
-      } catch (refreshError) {
-        showError(refreshError);
-      }
-      const updated = tasks.find((item) => item.id === task.id);
-      if (updated && updated.is_completed) {
-        showToasts(["تسک انجام‌شده علامت خورد."], "success");
-        return;
-      }
       showError(error);
       return;
     }
@@ -549,17 +449,17 @@ elements.taskList.addEventListener("click", async (event) => {
 
 document.querySelector("#cancelDelete").addEventListener("click", () => {
   pendingDeleteId = null;
-  document.querySelector("#deleteDialog").close();
+  elements.deleteDialog.close();
 });
 
 document.querySelector("#confirmDelete").addEventListener("click", async () => {
   if (pendingDeleteId === null) return;
 
   try {
-    await request(API.deleteTask(pendingDeleteId), { method: "DELETE" });
+    await workspaceApi.deleteTask(pendingDeleteId);
     tasks = tasks.filter((task) => task.id !== pendingDeleteId);
     pendingDeleteId = null;
-    document.querySelector("#deleteDialog").close();
+    elements.deleteDialog.close();
     renderTaskLists();
     await loadWorkspace({ silent: true });
     showToasts(["تسک حذف شد."], "success");
@@ -568,7 +468,7 @@ document.querySelector("#confirmDelete").addEventListener("click", async () => {
   }
 });
 
-document.querySelector("#deleteDialog").addEventListener("click", (event) => {
+elements.deleteDialog.addEventListener("click", (event) => {
   if (event.target === event.currentTarget) {
     event.currentTarget.close();
     pendingDeleteId = null;
@@ -660,42 +560,18 @@ document.querySelector("#profileAvatar").addEventListener("change", (event) => {
 elements.profileForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const form = elements.profileForm;
-  const profileData = {
-    bio: form.elements.bio.value.trim() || null,
-    first_name: form.elements.first_name.value.trim(),
-    last_name: form.elements.last_name.value.trim(),
-    date_of_birth: form.elements.date_of_birth.value || null,
-    gender: form.elements.gender.value || null,
-    postal_code: form.elements.postal_code.value.trim() || null,
-    address: form.elements.address.value.trim() || null,
-  };
-
-  // برای ایجاد پروفایل، این سه فیلد در schema اجباری هستند.
-  if (!profileExists) {
-    profileData.national_id = form.elements.national_id.value.trim();
-  }
-
+  const values = Object.fromEntries(new FormData(elements.profileForm));
   try {
-    await request(profileExists ? "/profile/change-profile-information" : "/profile/create", {
-      method: profileExists ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(profileData),
-    });
+    await workspaceApi.saveProfile(values, profileExists);
     profileExists = true;
 
     const avatar = document.querySelector("#profileAvatar").files[0];
     if (avatar) {
-      const uploadData = new FormData();
-      uploadData.append("avatar", avatar);
-      await request(API.uploadAvatar, {
-        method: "POST",
-        body: uploadData,
-      });
+      await workspaceApi.uploadAvatar(avatar);
     }
 
     const profile = await loadProfile();
-    const user = await request(API.user);
+    const user = await workspaceApi.getUser();
     setUserIdentity(user, profile);
     elements.profileDialog.close();
     showToasts(["پروفایل ذخیره شد."], "success");
@@ -708,7 +584,7 @@ document.querySelector("#deleteProfileButton").addEventListener("click", async (
   if (!window.confirm("پروفایل کاربری حذف شود؟")) return;
 
   try {
-    await request(API.deleteProfile, { method: "DELETE" });
+    await workspaceApi.deleteProfile();
     profileExists = false;
     profileLoaded = true;
     profileData = null;
@@ -717,7 +593,7 @@ document.querySelector("#deleteProfileButton").addEventListener("click", async (
     showAvatarPreview(null);
     elements.profileDialog.close();
 
-    const user = await request(API.user);
+    const user = await workspaceApi.getUser();
     setUserIdentity(user, null);
     showToasts(["پروفایل کاربری حذف شد."], "success");
   } catch (error) {
@@ -728,8 +604,8 @@ document.querySelector("#deleteProfileButton").addEventListener("click", async (
 document.querySelector("#logoutButton").addEventListener("click", async () => {
   closeProfileMenu();
   try {
-    await request("/users/logout", { method: "POST" });
-  } catch (error) {
+    await workspaceApi.logout();
+  } catch {
     // حتی اگر کوکی منقضی شده باشد، صفحه ورود در ادامه باز می‌شود.
   }
   window.location.assign("/");
@@ -740,9 +616,6 @@ document.querySelector("#welcomeDate").textContent =
 
 loadWorkspace();
 renderCalendar();
-window.setInterval(() => {
-  if (!document.hidden) loadWorkspace({ silent: true });
-}, REFRESH_INTERVAL);
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) loadWorkspace({ silent: true });

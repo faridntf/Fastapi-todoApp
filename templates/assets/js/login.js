@@ -1,4 +1,5 @@
-"use strict";
+import { errorMessages } from "./ui-errors.js";
+import * as loginApi from "./login.api.js";
 
 const aurora = document.getElementById("aurora");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -80,10 +81,33 @@ phone.addEventListener("input", () => {
 });
 
 [loginForm, registerForm].forEach((form) => {
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        statusMessage.textContent = "این فرم فعلاً نمایشی است؛ اطلاعاتی ارسال یا ذخیره نمی‌شود.";
-        statusMessage.hidden = false;
+        const button = form.querySelector('button[type="submit"]');
+        if (button.disabled) return;
+        button.disabled = true;
+        statusMessage.hidden = true;
+        const values = Object.fromEntries(new FormData(form));
+        try {
+            if (form === registerForm) {
+                await loginApi.register(values);
+                registerForm.reset();
+                validateConfirmation();
+                loginForm.elements.username.value = values.username;
+                history.replaceState(null, "", "#login");
+                showForm(true);
+                statusMessage.textContent = "حساب ساخته شد؛ حالا وارد حساب شو.";
+                statusMessage.hidden = false;
+            } else {
+                await loginApi.login(values);
+                window.location.assign("/dashboard/");
+            }
+        } catch (error) {
+            statusMessage.textContent = errorMessages(error).join(" — ");
+            statusMessage.hidden = false;
+        } finally {
+            button.disabled = false;
+        }
     });
     form.addEventListener("input", () => { statusMessage.hidden = true; });
 });

@@ -134,6 +134,11 @@
       <input class="form-input" id="taskTitle" name="title" required maxlength="50" placeholder="عنوان تسک را بنویس">
       <label class="form-label" for="taskDescription">توضیحات <span>(اختیاری)</span></label>
       <textarea class="form-input" id="taskDescription" name="description" maxlength="100" placeholder="توضیح کوتاه"></textarea>
+      <label class="form-label" for="taskCategory">دسته‌بندی</label>
+      <select class="form-input" id="taskCategory" name="category_id_fk" required aria-describedby="taskCategoryStatus">
+        <option value="">دسته‌بندی را انتخاب کن</option>
+      </select>
+      <small class="field-hint" id="taskCategoryStatus" role="status"></small>
       <label class="form-label" for="taskPriority">اولویت</label>
       <select class="form-input" id="taskPriority" name="grading">
         <option value="low">کم</option>
@@ -203,7 +208,6 @@
   </dialog>
 
   <div class="workspace-toasts" id="toastContainer" aria-live="polite" aria-relevant="additions"></div>
-  <script src="../assets/js/workspace.js" defer></script>
+  <script type="module" src="../assets/js/workspace.js"></script>
 </body>
 </html>
-

@@ -44,8 +44,6 @@ reducedMotion.addEventListener('change', configureMotion);
 configureMotion();
 
 function continueToApp() {
-  const value = taskInput.value.trim();
-  if (value) sessionStorage.setItem('tikrah_initial_task', value);
   window.location.assign(TARGET_URL);
 }
 goButton.addEventListener('click', continueToApp);

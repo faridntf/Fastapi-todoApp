@@ -1,9 +1,11 @@
+from fastapi import Depends
 from sqlalchemy import exists
 from models import TaskModel
 from sqlalchemy.orm import Session
+from core import get_db
 
 class TaskServices:
-    def __init__(self,db:Session):
+    def __init__(self,db:Session= Depends(get_db)):
         self.db = db
     
     def exist_task(self, task_title: str, user_id: int)-> bool:

@@ -20,6 +20,7 @@ from models import(
     EnUserRole
 )
 from services import TaskServices
+from services import CategoryServices
 from models import TaskModel
 from core import get_db
 from dependency.auth import get_current_user
@@ -30,18 +31,18 @@ router = APIRouter(
     tags=["tasks"],
     redirect_slashes=True
 )
-service = TaskServices(db=get_db)
 @router.post("/create",response_model=TaskResponseSc,status_code=status.HTTP_201_CREATED)
 def create_new_task(
     data:TaskCreateSc,
+    service: TaskServices = Depends(TaskServices),
+    category_service: CategoryServices = Depends(CategoryServices),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
     new_task = data.model_dump()
     set_task = TaskModel(**new_task)
     set_task.user_id_fk = current_user.id
-    
-    exist_category = service.category_exists_id(category_id = set_task.category_id_fk)
+    exist_category = category_service.category_exists_id(category_id = set_task.category_id_fk)
     if exist_category == False:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -63,10 +64,10 @@ def create_new_task(
 def get_list_tasks(
     limit:int,
     offset:int,
-    db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user)
 ):
-    my_tasks = service.get_my_all_tasks(limitt=limit,offsett=offset,user_id=current_user.id)
+    my_tasks = service.get_my_all_tasks(limit=limit,offset=offset,user_id=current_user.id)
     return my_tasks
 
 
@@ -75,7 +76,7 @@ def get_all_users_tasks(
     user_id : int,
     limit:int,
     offset:int,
-    db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user)
 ):
     if current_user.role==EnUserRole.GUEST or current_user.role == EnUserRole.USER:
@@ -91,7 +92,7 @@ def get_all_users_tasks(
 @router.get("/task-name")
 def get_task_by_name(
     task_name: str,
-    db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user)
 ):
     find_task = service.find_task_by_name(task_name=task_name,user_id=current_user.id)
@@ -103,7 +104,7 @@ def get_task_by_name(
 @router.get("/task-id/{task_id}")
 def get_task_by_id(
     task_id: int,
-    db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user)
 ):
     find_task = service.find_task_by_id(task_id=task_id,user_id=current_user.id)
@@ -116,6 +117,7 @@ def get_task_by_id(
 def update_task(
     task_id:int,
     data:TaskUpdateSc,
+    service: TaskServices = Depends(TaskServices),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
@@ -136,6 +138,7 @@ def update_task(
 def mark_the_task_completed(
     task_id:int,
     data:TaskMarkCompleted,
+    service: TaskServices = Depends(TaskServices),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
@@ -161,6 +164,7 @@ def mark_the_task_completed(
 def delete_task_id(
     task_id:int,
     db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user)
 ):
     if current_user.role != EnUserRole.GUEST:
@@ -180,6 +184,7 @@ def delete_task_id(
 @router.delete("/taskk/{task_name}",status_code=status.HTTP_204_NO_CONTENT)
 def delete_task_name(
     task_name:str,
+    service: TaskServices = Depends(TaskServices),
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
@@ -198,7 +203,7 @@ def delete_task_name(
 @router.get("/search-task/",response_model=List[TaskResponseSc],status_code=status.HTTP_200_OK)
 def search_task_query(
     q: str = Query(...,min_length=1,max_length=50),
-    db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user)
 ):
     if current_user.role == EnUserRole.GUEST:
@@ -214,7 +219,7 @@ def search_task_query(
 @router.get("/task-status")
 def get_task_by_status(
     is_completeed: bool = Query(...),
-    db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user)
 ):
     if current_user.role == EnUserRole.GUEST:
@@ -230,7 +235,7 @@ def get_task_by_status(
 @router.get("/get-task-by-category")
 def task_by_category(
     cat_id: int = Query(...),
-    db: Session = Depends(get_db),
+    service: TaskServices = Depends(TaskServices),
     current_user: UserModel = Depends(get_current_user),
 ):
     if current_user.role == EnUserRole.GUEST:
