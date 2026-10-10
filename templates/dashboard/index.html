@@ -26,7 +26,7 @@
         <circle cx="10.8" cy="10.8" r="6.8"></circle>
         <path d="m16 16 4.2 4.2"></path>
       </svg>
-      <input id="searchInput" type="search" placeholder="جست‌وجو در تسک‌ها" aria-label="جست‌وجو در تسک‌ها">
+      <input id="searchInput" type="search" placeholder="جست‌وجو در کار‌ها" aria-label="جست‌وجو در کار‌ها">
     </label>
 
     <div class="top-actions">
@@ -47,7 +47,7 @@
   </header>
 
   <div class="app-shell">
-    <aside class="sidebar" aria-label="فیلتر تسک‌ها">
+    <aside class="sidebar" aria-label="فیلتر کار‌ها">
       <nav class="primary-nav">
         <button class="nav-link active" type="button" data-filter="all">کارهای من</button>
         <button class="nav-link" type="button" data-filter="pending">انجام‌نشده</button>
@@ -67,11 +67,11 @@
         </div>
         <button class="add-task-button" id="openTaskForm" type="button">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
-          <span>افزودن تسک</span>
+          <span>افزودن کار</span>
         </button>
       </section>
 
-      <section class="stats-grid" aria-label="آمار تسک‌ها">
+      <section class="stats-grid" aria-label="آمار کار‌ها">
         <article class="stat-card">
           <span class="stat-icon stat-purple" aria-hidden="true">☷</span>
           <div><strong id="totalCount">۰</strong><span>مجموع کارها</span></div>
@@ -89,6 +89,9 @@
       <section class="task-card">
         <div class="section-heading">
           <h2 id="taskHeading">کارهای من</h2>
+        </div>
+        <div class="task-columns" aria-hidden="true">
+          <span></span><span>تسک</span><span>دسته‌بندی</span><span>اولویت</span><span>عملیات</span>
         </div>
         <div class="task-list" id="taskList" aria-live="polite"></div>
         <div class="empty-state" id="emptyState" hidden>کاری برای نمایش وجود ندارد.</div>
@@ -118,7 +121,7 @@
           <span id="pendingCount">۰</span>
         </div>
         <div class="upcoming-list" id="pendingTasks" aria-live="polite"></div>
-        <p class="pending-empty" id="pendingEmpty" hidden>همهٔ تسک‌ها انجام شده‌اند.</p>
+        <p class="pending-empty" id="pendingEmpty" hidden>همهٔ کار‌ها انجام شده‌اند.</p>
       </section>
     </aside>
   </div>
@@ -126,12 +129,12 @@
   <dialog class="task-dialog" id="taskDialog">
     <form id="taskForm">
       <div class="dialog-heading">
-        <div><span class="eyebrow">برنامه‌ریزی روزانه</span><h2 id="taskDialogTitle">افزودن تسک</h2></div>
+        <div><span class="eyebrow">برنامه‌ریزی روزانه</span><h2 id="taskDialogTitle">افزودن کار</h2></div>
         <button class="icon-button" id="closeTaskForm" type="button" aria-label="بستن">×</button>
       </div>
       <input id="taskId" name="id" type="hidden">
-      <label class="form-label" for="taskTitle">عنوان تسک</label>
-      <input class="form-input" id="taskTitle" name="title" required maxlength="50" placeholder="عنوان تسک را بنویس">
+      <label class="form-label" for="taskTitle">عنوان کار</label>
+      <input class="form-input" id="taskTitle" name="title" required maxlength="50" placeholder="عنوان کار را بنویس">
       <label class="form-label" for="taskDescription">توضیحات <span>(اختیاری)</span></label>
       <textarea class="form-input" id="taskDescription" name="description" maxlength="100" placeholder="توضیح کوتاه"></textarea>
       <label class="form-label" for="taskCategory">دسته‌بندی</label>
@@ -199,8 +202,8 @@
   </dialog>
 
   <dialog class="delete-dialog" id="deleteDialog" aria-labelledby="deleteDialogTitle">
-    <h2 id="deleteDialogTitle">حذف تسک</h2>
-    <p id="deleteDialogMessage">از حذف این تسک مطمئنی؟</p>
+    <h2 id="deleteDialogTitle">حذف کار</h2>
+    <p id="deleteDialogMessage">از حذف این کار مطمئنی؟</p>
     <div class="delete-dialog-actions">
       <button class="cancel-delete" id="cancelDelete" type="button">لغو</button>
       <button class="confirm-delete" id="confirmDelete" type="button">حذف شود</button>

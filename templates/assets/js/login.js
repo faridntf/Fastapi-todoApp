@@ -114,3 +114,15 @@ phone.addEventListener("input", () => {
 
 window.addEventListener("hashchange", () => showForm(true));
 showForm();
+
+async function redirectSignedInUser() {
+    try {
+        if (await loginApi.hasActiveSession()) {
+            window.location.replace("/dashboard/");
+        }
+    } catch {
+        // Keep the login form available if the session check is unavailable.
+    }
+}
+
+redirectSignedInUser();

@@ -22,6 +22,7 @@ const elements = {
 };
 
 let tasks = [];
+let categoryNames = new Map();
 let currentFilter = "all";
 let profileExists = false;
 let profileLoaded = false;
@@ -118,9 +119,16 @@ async function loadWorkspace(options = {}) {
     const data = await Promise.all([
       workspaceApi.getUser(),
       workspaceApi.getAllTasks(),
+      workspaceApi.getCategories().catch((error) => {
+        if (!options.silent) showError(error);
+        return null;
+      }),
     ]);
 
     tasks = data[1];
+    if (data[2] !== null) {
+      categoryNames = new Map(data[2].map((category) => [String(category.id), category.name]));
+    }
     if (!profileLoaded) await loadProfile();
     setUserIdentity(data[0], profileData);
     renderTaskLists();
@@ -307,6 +315,13 @@ function renderTasks() {
     priority.className = "priority " + task.grading;
     priority.textContent = priorityLabel(task.grading);
 
+    const category = document.createElement("span");
+    category.className = "task-category";
+    category.textContent = categoryNames.get(String(task.category_id_fk))
+      || (task.category_id_fk == null ? "بدون دسته‌بندی" : "دستهٔ " + numberFormat.format(task.category_id_fk));
+    category.title = category.textContent;
+    category.setAttribute("aria-label", "دسته‌بندی: " + category.textContent);
+
     const actions = document.createElement("div");
     actions.className = "task-actions";
     actions.append(
@@ -314,7 +329,7 @@ function renderTasks() {
       makeTaskButton("حذف", "delete", "task-delete", false)
     );
 
-    row.append(toggle, copy, priority, actions);
+    row.append(toggle, copy, category, priority, actions);
     elements.taskList.append(row);
   });
 
@@ -361,6 +376,8 @@ async function openTaskDialog(task) {
   try {
     const categories = await workspaceApi.getCategories();
     if (version !== taskDialogVersion) return;
+    categoryNames = new Map(categories.map((category) => [String(category.id), category.name]));
+    renderTasks();
     for (const category of categories) {
       categorySelect.add(new Option(category.name, String(category.id)));
     }
