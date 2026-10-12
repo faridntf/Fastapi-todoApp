@@ -8,17 +8,23 @@ from fastapi import Response
 import jwt
 from core import setting
 
+
+def set_cookie_time(minutes):
+    isuTime = datetime.now(timezone.utc)
+    expire = isuTime + timedelta(minutes=minutes)
+    return {
+        "isuTime": isuTime,
+        "expire": expire
+    }
+
 def create_access_token(user_id: int) -> str:
-    isuueTime = datetime.now(timezone.utc)
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=setting.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+    set_ = set_cookie_time(setting.ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
-        "jid": str(uuid4()),
         "token type" : "access",
-        "sub": str(user_id),
-        "iat" : isuueTime,
-        "exp": expire,
+        "jid" : str(uuid4()),
+        "sub" : str(user_id),
+        "iat" : set_.get("isuTime"),
+        "exp" : set_.get("expire")
     }
     token = jwt.encode(
         payload,
@@ -27,17 +33,14 @@ def create_access_token(user_id: int) -> str:
     )
     return token
 
-def create_refresh_token(user_id: int) -> str:
-    isuTime = datetime.now(timezone.utc)
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=setting.REFRESH_TOKEN_EXPIRE_MINUTES
-    )
+def create_refresh_token(user_id: int, jti:str ) -> str:
+    set_ = set_cookie_time(setting.REFRESH_TOKEN_EXPIRE_MINUTES)
     payload = {
-        "jid": str(uuid4()),
         "token type" : "refresh",
-        "sub": str(user_id),
-        "iat" : isuTime,
-        "exp": expire,
+        "jti" : jti,
+        "sub" : str(user_id),
+        "iat" : set_.get("isuTime"),
+        "exp" : set_.get("expire")
     }
     token = jwt.encode(
         payload,
@@ -68,7 +71,29 @@ def decode_token(token_type,token: str) -> int:
                 raise ValueError("Token subject missing")
             return int(user_id)
 
-def set_coookie(token_type:str, my_token: str, response: Response)-> None:
+def get_token_id(token_type,token: str) -> str:
+    if token_type == "access":
+        payload = jwt.decode(
+            token,
+            setting.ACCESS_TOKEN_SECRET_KEY,
+            algorithms = setting.ALGORITHM,
+        )
+        token_id = payload.get("jti")
+        if token_id is None:
+            raise ValueError("Token subject missing")
+        return token_id
+    if token_type == "refresh":
+            payload = jwt.decode(
+                token,
+                setting.REFRESH_TOKEN_SECRET_KEY,
+                algorithms = setting.ALGORITHM,
+            )
+            token_id = payload.get("jti")
+            if token_id is None:
+                raise ValueError("Token subject missing")
+            return token_id
+
+def set_coookie(token_type:str, my_token: str, response: Response):
     if token_type == "access_token":
         response.set_cookie(
             key=token_type,
@@ -79,13 +104,15 @@ def set_coookie(token_type:str, my_token: str, response: Response)-> None:
             max_age= setting.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             path="/"
         )
+        return "generate successfully"
     if token_type == "refresh_token":
-            response.set_cookie(
-                key=token_type,
-                value=my_token,
-                httponly=True,
-                secure=setting.SECURE_SETTING,
-                samesite=setting.SAMESITE_SETTING,
-                max_age= setting.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
-                path="/"
-            )
+        response.set_cookie(
+            key=token_type,
+            value=my_token,
+            httponly=True,
+            secure=setting.SECURE_SETTING,
+            samesite=setting.SAMESITE_SETTING,
+            max_age= setting.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
+            path="/"
+        )
+        return "generate successfully"

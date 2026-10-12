@@ -1,5 +1,6 @@
 from datetime import date
 from enum import Enum
+from typing import List
 from sqlalchemy import (
     Integer,
     String,
@@ -17,6 +18,7 @@ from pwdlib import PasswordHash
 from core import Base
 from models.profiles import ProfileModel
 from models.tasks import TaskModel
+from models.auth import RefreshTokenModel
     
 
 def enum_values(enum_class: type[Enum]) -> list[str]:
@@ -131,6 +133,12 @@ class UserModel(Base):
             cascade="all,delete-orphan",
             single_parent=True,
         )
+    
+    refresh_tokens : Mapped[List["RefreshTokenModel"]] = relationship(
+        "RefreshTokenModel",
+        back_populates="user_tokens",
+        cascade="all,delete-orphan"
+    )
     
     def __repr__(self) -> str:
         return f"<User(id={self.id}, username='{self.username}', role={self.role})>"

@@ -1,3 +1,4 @@
+from uuid import uuid4
 from fastapi import(
     APIRouter,
     Depends,
@@ -23,7 +24,8 @@ from services import(
     UserServices,
     create_access_token,
     create_refresh_token,
-    set_coookie
+    set_coookie,
+    RefreshTokenService
 )
 from dependency.auth import get_current_user
 
@@ -32,10 +34,25 @@ router = APIRouter(
     tags=["users"]
 )
 
-#todo => bakhsh refresh token takmil beshe
+
 @router.post("/refresh-token")
-def sync_refresh_token():
-    pass
+def sync_refresh_token(
+    request: Request,
+    response : Response,
+    service: RefreshTokenService = Depends(RefreshTokenService)
+):
+    refresh_token = request.cookies.get("refresh_token")
+    user_agent = request.headers.get("user-agent")
+    result = service.verify_token(data=refresh_token,user_agent=user_agent)
+    if result:
+        new_access_token = create_access_token(user_id = result.user_id_fk)
+        res = set_coookie("access_token",new_access_token,response=response)
+        return res
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Inactive token"
+        )
 
 
 @router.post("/register",response_model=UserResponseSc,status_code=status.HTTP_201_CREATED)
@@ -66,12 +83,13 @@ def create_account(
 
 @router.post("/login")
 def login_account(
+    request: Request,
     response: Response,
     login_data: OAuth2PasswordRequestForm = Depends(),
-    service: UserServices = Depends(UserServices),
-    db:Session = Depends(get_db)
+    userservice: UserServices = Depends(UserServices),
+    tokenservice: RefreshTokenService = Depends(RefreshTokenService)
 ):
-    user = service.find_user(data=login_data.username)
+    user = userservice.find_user(data=login_data.username)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -89,10 +107,16 @@ def login_account(
             detail="this account is not active"
             )
     access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token(user.id)
+    jti = str(uuid4())
+    refresh_token = create_refresh_token(user.id,jti=jti)
     set_coookie("access_token",access_token,response=response)
     set_coookie("refresh_token",refresh_token,response=response)
-    service.set_lastlogin_time(username=user.username)
+    userservice.set_lastlogin_time(username=user.username)
+    tokenservice.add_token_db(
+        my_token=refresh_token,
+        user_id=user.id,
+        jti=jti,
+        user_agent=request.headers.get("user-agent"))
     return "login successfully"
     
 @router.post("/logout")
