@@ -10,6 +10,13 @@ export async function hasActiveSession() {
   }
 }
 
+export function refreshToken() {
+  return request("/users/refresh-token", {
+    method: "POST",
+    credentials: "same-origin",
+  });
+}
+
 export function login({ username, password }) {
   return request("/users/login", {
     method: "POST",

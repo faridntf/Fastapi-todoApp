@@ -57,5 +57,5 @@ app.include_router(api_router,prefix="/api",)
 
 
 #serv frontend pages
-# app.frontend("/",directory="templates/",fallback="404.html")
-patch_fastapi(app,docs_url="/swagger")
+app.frontend("/",directory="templates/",fallback="404.html")
+# patch_fastapi(app,docs_url="/swagger")
